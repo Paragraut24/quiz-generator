@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface QuizQuestion {
   question: string;
@@ -13,7 +13,7 @@ interface QuizQuestion {
 export default function QuizPage() {
   const [topic, setTopic] = useState('');
   const [difficulty, setDifficulty] = useState('medium');
-  const [numQuestions, setNumQuestions] = useState(5);
+  const [numQuestions, setNumQuestions] = useState(3);
   const [questionType, setQuestionType] = useState('mcq');
   const [quiz, setQuiz] = useState<QuizQuestion[]>([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -86,34 +86,62 @@ export default function QuizPage() {
     setQuizCompleted(false);
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold text-center mb-8 text-white">
-          AI Quiz Generator
-        </h1>
+  const getScoreEmoji = () => {
+    const percentage = (score / quiz.length) * 100;
+    if (percentage >= 90) return '🏆';
+    if (percentage >= 70) return '🎉';
+    if (percentage >= 50) return '👍';
+    return '💪';
+  };
 
+  return (
+    <div className="min-h-screen p-4 md:p-6 flex items-center justify-center">
+      <div className="w-full max-w-4xl mx-auto">
+        {/* Animated Header */}
+        <div className="text-center mb-12 animate-slide-up">
+          <div className="animate-float mb-4">
+            <h1 className="text-5xl md:text-7xl font-bold mb-4 gradient-text">
+              AI Quiz Generator
+            </h1>
+          </div>
+          <p className="text-xl text-gray-400 animate-fade-in">
+            Create personalized quizzes powered by AI ✨
+          </p>
+        </div>
+
+        {/* Quiz Setup Form */}
         {quiz.length === 0 && !quizCompleted && (
-          <div className="glass rounded-xl p-8 mb-8">
-            <div className="space-y-6">
-              <div>
-                <label className="block text-white mb-2">Topic:</label>
+          <div className="glass-card p-8 max-w-2xl mx-auto animate-slide-up hover-lift">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-semibold mb-2 text-white">Create Your Quiz</h2>
+              <p className="text-gray-400">Choose your topic and get started!</p>
+            </div>
+            
+            <div className="space-y-8">
+              {/* Topic Input with Animation */}
+              <div className="animate-fade-in">
+                <label className="block text-sm font-medium mb-3 text-gray-300">
+                  🎯 What topic would you like to be quizzed on?
+                </label>
                 <input
                   type="text"
                   value={topic}
                   onChange={(e) => setTopic(e.target.value)}
-                  className="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white"
-                  placeholder="Enter quiz topic..."
+                  className="input-field"
+                  placeholder="e.g., Python programming, World History, Biology..."
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-white mb-2">Difficulty:</label>
+              {/* Settings Grid with Staggered Animation */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
+                  <label className="block text-sm font-medium mb-3 text-gray-300">
+                    📊 Difficulty
+                  </label>
                   <select
                     value={difficulty}
                     onChange={(e) => setDifficulty(e.target.value)}
-                    className="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white"
+                    className="input-field"
                   >
                     <option value="easy">Easy</option>
                     <option value="medium">Medium</option>
@@ -121,24 +149,28 @@ export default function QuizPage() {
                   </select>
                 </div>
 
-                <div>
-                  <label className="block text-white mb-2">Questions:</label>
+                <div className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
+                  <label className="block text-sm font-medium mb-3 text-gray-300">
+                    🔢 Questions
+                  </label>
                   <input
                     type="number"
                     value={numQuestions}
                     onChange={(e) => setNumQuestions(Number(e.target.value))}
                     min="1"
-                    max="20"
-                    className="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white"
+                    max="10"
+                    className="input-field"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-white mb-2">Type:</label>
+                <div className="animate-fade-in" style={{ animationDelay: '0.3s' }}>
+                  <label className="block text-sm font-medium mb-3 text-gray-300">
+                    📝 Type
+                  </label>
                   <select
                     value={questionType}
                     onChange={(e) => setQuestionType(e.target.value)}
-                    className="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white"
+                    className="input-field"
                   >
                     <option value="mcq">Multiple Choice</option>
                     <option value="tf">True/False</option>
@@ -146,114 +178,167 @@ export default function QuizPage() {
                 </div>
               </div>
 
-              <button
-                onClick={generateQuiz}
-                disabled={isGenerating || !topic.trim()}
-                className="w-full py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-semibold disabled:opacity-50"
-              >
-                {isGenerating ? 'Generating Quiz...' : 'Generate Quiz'}
-              </button>
+              {/* Generate Button with Animation */}
+              <div className="animate-fade-in" style={{ animationDelay: '0.4s' }}>
+                <button
+                  onClick={generateQuiz}
+                  disabled={isGenerating || !topic.trim()}
+                  className="btn-primary w-full"
+                >
+                  {isGenerating ? (
+                    <span className="flex items-center justify-center">
+                      <div className="loading-spinner mr-3"></div>
+                      Generating Quiz...
+                    </span>
+                  ) : (
+                    <span className="flex items-center justify-center">
+                      🚀 Generate Quiz
+                    </span>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         )}
 
+        {/* Quiz Questions */}
         {quiz.length > 0 && !quizCompleted && (
-          <div className="glass rounded-xl p-8">
-            <div className="mb-6">
+          <div className="glass-card p-8 max-w-4xl mx-auto animate-slide-up">
+            {/* Animated Progress Section */}
+            <div className="mb-8 animate-fade-in">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold text-white">
-                  Question {currentQuestion + 1}/{quiz.length}
-                </h2>
-                <span className="px-3 py-1 bg-purple-500 text-white rounded-full text-sm">
-                  {quiz[currentQuestion].difficulty.toUpperCase()}
+                <div>
+                  <span className="text-lg font-semibold text-white">
+                    Question {currentQuestion + 1} of {quiz.length}
+                  </span>
+                  <p className="text-gray-400 text-sm">Keep going, you are doing great! 💪</p>
+                </div>
+                <span className="difficulty-badge animate-pulse-custom">
+                  {quiz[currentQuestion].difficulty}
                 </span>
               </div>
-              
-              <h3 className="text-xl text-white mb-6">
+              <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
+                <div 
+                  className="progress-bar transition-all duration-500 ease-out" 
+                  style={{ width: `${((currentQuestion + 1) / quiz.length) * 100}%` }}
+                ></div>
+              </div>
+            </div>
+
+            {/* Question Section */}
+            <div className="mb-8 animate-slide-up">
+              <h3 className="text-2xl md:text-3xl font-semibold mb-6 leading-relaxed text-white">
                 {quiz[currentQuestion].question}
               </h3>
 
-              {questionType === 'mcq' ? (
-                <div className="space-y-3 mb-6">
-                  {quiz[currentQuestion].options?.map((option, index) => (
+              {/* Answer Options with Staggered Animation */}
+              <div className="space-y-4">
+                {questionType === 'mcq' ? (
+                  quiz[currentQuestion].options?.map((option, index) => (
                     <button
                       key={index}
                       onClick={() => setSelectedAnswer(option)}
                       disabled={showResult}
-                      className={`w-full p-4 text-left rounded-lg border transition-all ${
-                        selectedAnswer === option
-                          ? 'bg-purple-500 border-purple-400 text-white'
-                          : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
-                      } ${showResult && option === quiz[currentQuestion].answer
-                        ? 'bg-green-500 border-green-400'
-                        : showResult && selectedAnswer === option && option !== quiz[currentQuestion].answer
-                        ? 'bg-red-500 border-red-400'
-                        : ''
+                      className={`option-btn animate-fade-in ${
+                        selectedAnswer === option ? 'option-selected' : ''
+                      } ${
+                        showResult && option === quiz[currentQuestion].answer
+                          ? 'option-correct'
+                          : showResult && selectedAnswer === option && option !== quiz[currentQuestion].answer
+                          ? 'option-incorrect'
+                          : ''
                       }`}
+                      style={{ animationDelay: `${index * 0.1}s` }}
                     >
-                      {option}
+                      <span className="flex items-center">
+                        <span className="w-8 h-8 rounded-full border-2 border-current mr-4 flex items-center justify-center text-sm font-bold flex-shrink-0">
+                          {String.fromCharCode(65 + index)}
+                        </span>
+                        <span className="flex-1">{option}</span>
+                      </span>
                     </button>
-                  ))}
-                </div>
-              ) : (
-                <div className="space-y-3 mb-6">
-                  {['True', 'False'].map((option) => (
+                  ))
+                ) : (
+                  ['True', 'False'].map((option, index) => (
                     <button
                       key={option}
                       onClick={() => setSelectedAnswer(option)}
                       disabled={showResult}
-                      className={`w-full p-4 text-left rounded-lg border transition-all ${
-                        selectedAnswer === option
-                          ? 'bg-purple-500 border-purple-400 text-white'
-                          : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
+                      className={`option-btn animate-fade-in ${
+                        selectedAnswer === option ? 'option-selected' : ''
                       }`}
+                      style={{ animationDelay: `${index * 0.1}s` }}
                     >
-                      {option}
+                      <span className="flex items-center">
+                        <span className="w-8 h-8 rounded-full border-2 border-current mr-4 flex items-center justify-center text-sm font-bold">
+                          {option[0]}
+                        </span>
+                        <span className="flex-1">{option}</span>
+                      </span>
                     </button>
-                  ))}
-                </div>
-              )}
-
-              {showResult && (
-                <div className="mb-6 p-4 bg-blue-500/20 rounded-lg border border-blue-400">
-                  <h4 className="text-white font-semibold mb-2">Explanation:</h4>
-                  <p className="text-white">{quiz[currentQuestion].explanation}</p>
-                </div>
-              )}
-
-              <div className="flex gap-4">
-                {!showResult ? (
-                  <button
-                    onClick={handleAnswer}
-                    disabled={!selectedAnswer}
-                    className="px-6 py-3 bg-purple-500 text-white rounded-lg disabled:opacity-50"
-                  >
-                    Submit Answer
-                  </button>
-                ) : (
-                  <button
-                    onClick={nextQuestion}
-                    className="px-6 py-3 bg-green-500 text-white rounded-lg"
-                  >
-                    {currentQuestion < quiz.length - 1 ? 'Next Question' : 'Finish Quiz'}
-                  </button>
+                  ))
                 )}
               </div>
+            </div>
+
+            {/* Explanation with Animation */}
+            {showResult && (
+              <div className="explanation animate-slide-up">
+                <h4 className="font-semibold mb-3 text-blue-300 flex items-center">
+                  💡 Explanation:
+                </h4>
+                <p className="text-gray-300">{quiz[currentQuestion].explanation}</p>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex gap-4 mt-8">
+              {!showResult ? (
+                <button
+                  onClick={handleAnswer}
+                  disabled={!selectedAnswer}
+                  className="btn-primary flex-1 animate-fade-in"
+                >
+                  Submit Answer ✓
+                </button>
+              ) : (
+                <button
+                  onClick={nextQuestion}
+                  className="btn-primary flex-1 animate-glow"
+                >
+                  {currentQuestion < quiz.length - 1 ? 'Next Question →' : 'Finish Quiz 🏁'}
+                </button>
+              )}
             </div>
           </div>
         )}
 
+        {/* Quiz Completion with Celebration Animation */}
         {quizCompleted && (
-          <div className="glass rounded-xl p-8 text-center">
-            <h2 className="text-3xl font-bold text-white mb-4">Quiz Completed!</h2>
-            <p className="text-xl text-white mb-6">
-              You scored {score} out of {quiz.length} questions
-            </p>
+          <div className="glass-card p-8 max-w-2xl mx-auto text-center animate-slide-up">
+            <div className="mb-8">
+              <div className="text-8xl mb-6 animate-float">{getScoreEmoji()}</div>
+              <h2 className="text-4xl font-bold mb-4 text-white">Quiz Completed!</h2>
+              <div className="score-display mb-4 animate-pulse-custom">
+                {score}/{quiz.length}
+              </div>
+              <p className="text-2xl text-gray-400 mb-2">
+                You scored {Math.round((score / quiz.length) * 100)}%!
+              </p>
+              <p className="text-lg text-gray-500 mb-8">
+                {score === quiz.length ? 'Perfect score! 🎯' : 
+                 score >= quiz.length * 0.7 ? 'Great job! 🌟' : 
+                 'Keep practicing! 📚'}
+              </p>
+            </div>
+            
             <button
               onClick={resetQuiz}
-              className="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-semibold"
+              className="btn-primary hover-lift animate-glow"
             >
-              Generate New Quiz
+              <span className="flex items-center justify-center">
+                🔄 Take Another Quiz
+              </span>
             </button>
           </div>
         )}
